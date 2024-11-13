@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const questions = require('./questions'); // Archivo con las preguntas organizadas por categoría
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -17,7 +18,7 @@ let selectedCategory = null;
 let gameStarted = false;
 let host = null;
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Manejo de la conexión de los jugadores
 io.on('connection', (socket) => {
@@ -27,6 +28,7 @@ io.on('connection', (socket) => {
     if (host === null) {
         host = socket.id;
         io.to(socket.id).emit("isHost", true); // Indicar al cliente que es el host
+        console.log(`Usuario ${socket.id} asignado como host`);
     } else {
         io.to(socket.id).emit("isHost", false);
     }
@@ -43,6 +45,8 @@ io.on('connection', (socket) => {
             socket.emit("error", { message: "Categoría no encontrada" });
             return;
         }
+
+        console.log(`Juego iniciado por el host ${socket.id} con la categoría: ${category}`);
 
         // Resetear el estado del juego
         gameStarted = true;
@@ -75,6 +79,8 @@ io.on('connection', (socket) => {
             socket.emit("feedback", { message: `Incorrecto. La respuesta correcta era: ${currentQuestion.answer}` });
         }
 
+        console.log(`Usuario ${socket.id} respondió ${isCorrect ? 'correctamente' : 'incorrectamente'}. Puntos obtenidos: ${points}`);
+
         // Verificar si todos los jugadores han respondido a la pregunta actual
         if (Object.values(players).every(player => player.answered)) {
             clearInterval(interval);
@@ -93,6 +99,7 @@ io.on('connection', (socket) => {
             host = playerIds.length > 0 ? playerIds[0] : null;
             if (host) {
                 io.to(host).emit("isHost", true);
+                console.log(`Nuevo host asignado: ${host}`);
             }
         }
     });
@@ -100,6 +107,7 @@ io.on('connection', (socket) => {
 
 // Iniciar una nueva ronda de preguntas
 function startRound() {
+    console.log("Iniciando una nueva ronda...");
     io.emit("newRound"); 
     nextQuestion();
 }
@@ -127,6 +135,7 @@ function nextQuestion() {
 
     // Enviar la pregunta a todos los jugadores
     if (currentQuestion) {
+        console.log(`Nueva pregunta: ${currentQuestion.question}`);
         io.emit("newQuestion", { question: currentQuestion.question, options: currentQuestion.options });
     } else {
         console.log("Error: No se pudo seleccionar una pregunta.");
@@ -158,6 +167,7 @@ function nextQuestion() {
 
 // Función para finalizar el juego y mostrar el puntaje individual a cada jugador
 function endGame() {
+    console.log("El juego ha finalizado. Mostrando resultados...");
     // Enviar el puntaje final solo al jugador correspondiente
     Object.keys(players).forEach(socketId => {
         const player = players[socketId];
@@ -173,10 +183,7 @@ function endGame() {
     Object.values(players).forEach(player => player.answered = false);
 }
 
-const path = require('path');
-app.use(express.static(path.join(__dirname, 'public')));
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
