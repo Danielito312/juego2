@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Preguntas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Juego de Preguntas</h1>
+
+    <!-- Sección de selección de categoría -->
+    <div id="categorySelection">
+        <h2>Presiona "Iniciar" para seleccionar una categoría al azar</h2>
+        <button id="startButton">Iniciar Juego</button>
+    </div>
+
+    <!-- Sección de preguntas y opciones -->
+    <div id="questionSection" class="hidden">
+        <h2 id="categoryText"></h2>
+        <h3 id="questionText">Pregunta:</h3>
+        <div id="optionsContainer"></div>
+        <p>Tiempo restante: <span id="timeLeft">10</span> segundos</p>
+    </div>
+
+    <!-- Sección de resultados -->
+    <div id="resultsSection" class="hidden">
+        <h2>Resultados Finales</h2>
+        <div id="resultsContainer"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
