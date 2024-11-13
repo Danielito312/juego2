@@ -31,5 +31,29 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on('isHost', (isHost) => {
+            if (isHost) {
+                document.getElementById("startButton").style.display = "block";
+            }
+        });
+
+        document.getElementById("startButton").addEventListener("click", () => {
+            socket.emit('startGame', "Geografía"); // Puedes cambiar la categoría
+        });
+
+        socket.on('newQuestion', (data) => {
+            // Muestra la pregunta y opciones
+            console.log("Nueva pregunta:", data.question);
+        });
+
+        socket.on('showResults', (data) => {
+            alert("Tu puntaje final es: " + data.score);
+        });
+    </script>
 </body>
 </html>
